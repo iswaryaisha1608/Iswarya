@@ -1,0 +1,21 @@
+import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+import joblib
+
+# Sample data
+data = pd.DataFrame({
+    'age': [25, 45, 35, 50],
+    'bp': [120, 140, 130, 150],
+    'sugar': [90, 110, 95, 115],
+    'disease': ['Healthy', 'Diabetes', 'Healthy', 'Diabetes']
+})
+
+X = data[['age', 'bp', 'sugar']]
+y = data['disease']
+
+model = RandomForestClassifier()
+model.fit(X, y)
+
+# Save model
+joblib.dump(model, 'disease_model.pkl')
