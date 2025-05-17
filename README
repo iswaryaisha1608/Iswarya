@@ -1,0 +1,46 @@
+from flask import Flask, render_template, request, redirect, url_for, session
+import pandas as pd
+import joblib
+
+app = Flask(__name__)
+app.secret_key = 'secret_key'
+
+# Load ML model
+model = joblib.load('disease_model.pkl')
+
+# Dummy user credentials
+users = {
+    'patient1': 'password123'
+}
+
+@app.route('/')
+def home():
+    return render_template('login.html')
+
+@app.route('/login', methods=['POST'])
+def login():
+    username = request.form['username']
+    password = request.form['password']
+    if username in users and users[username] == password:
+        session['user'] = username
+        return redirect(url_for('predict'))
+    return "Invalid credentials"
+
+@app.route('/predict', methods=['GET', 'POST'])
+def predict():
+    if 'user' not in session:
+        return redirect(url_for('home'))
+    
+    if request.method == 'POST':
+        age = int(request.form['age'])
+        bp = float(request.form['bp'])
+        sugar = float(request.form['sugar'])
+        
+        data = pd.DataFrame([[age, bp, sugar]], columns=['age', 'bp', 'sugar'])
+        prediction = model.predict(data)[0]
+        return f'Predicted Disease: {prediction}'
+    
+    return render_template('predict.html')
+
+if __name__ == '__main__':
+    app.run(debug=True)
